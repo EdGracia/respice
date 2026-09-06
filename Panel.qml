@@ -33,7 +33,7 @@ Panel {
     root.index = (root.index + 1) % root.quotes.length
   }
 
-  readonly property int maxReflectionWords: 20
+  readonly property int maxReflectionWords: 30
   property bool addingReflection: false
 
   // Editor closes with the panel so it never reopens on stale text.
