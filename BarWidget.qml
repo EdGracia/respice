@@ -5,33 +5,56 @@ BarWidget {
   id: root
   moduleName: "respice"
 
-  readonly property var quotes: [
-    "Memento mori.",
-    "You have power over your mind, not outside events.",
-    "Waste no more time arguing what a good man should be. Be one.",
-    "The obstacle is the way."
-  ]
+  function injectPanel() {
+    var target = panelLoader.item
+    if (!target) return
+    if ("bar" in target) target.bar = root.bar
+    if ("settings" in target) target.settings = root.settings
+    if ("anchorItem" in target) target.anchorItem = button
+    if ("hostWidget" in target) target.hostWidget = root
+  }
 
-  property int index: 0
+  // Shape contract for shell.summon/hide/toggle routing (Bar.findPanelWidget
+  // requires open/close/opened on the bar-widget root, not the nested panel).
+  readonly property bool opened: panelLoader.item ? panelLoader.item.opened === true : false
+
+  function open() {
+    if (panelLoader.item) panelLoader.item.open()
+  }
+
+  function close() {
+    if (panelLoader.item) panelLoader.item.close()
+  }
+
+  function toggle() {
+    if (panelLoader.item) panelLoader.item.toggle()
+  }
 
   implicitWidth: button.implicitWidth
   implicitHeight: button.implicitHeight
 
-  Timer {
-    interval: 60000
-    running: true
-    repeat: true
-    onTriggered: root.index = (root.index + 1) % root.quotes.length
+  onBarChanged: injectPanel()
+  onSettingsChanged: injectPanel()
+
+  Loader {
+    id: panelLoader
+    active: true
+    source: Qt.resolvedUrl("Panel.qml")
+    visible: false
+    onLoaded: {
+      root.injectPanel()
+      Qt.callLater(root.injectPanel)
+    }
   }
 
   BarIconButton {
     id: button
     anchors.fill: parent
     bar: root.bar
-    text: root.quotes[root.index]
-    tooltipText: "Respice — click to reflect"
+    text: "🧔🏼"
+    tooltipText: "Respice"
     onPressed: function(b) {
-      root.index = (root.index + 1) % root.quotes.length
+      root.toggle()
     }
   }
 }

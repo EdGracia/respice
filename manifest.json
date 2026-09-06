@@ -13,7 +13,7 @@
   },
   "barWidget": {
     "displayName": "Respice",
-    "description": "Rotating stoic quotes and reflections in a bar pill.",
+    "description": "Rotating stoic quotes and reflections in your toolbar",
     "category": "Info",
     "allowMultiple": false
   }
