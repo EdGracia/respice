@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "respice",
+  "name": "Respice",
+  "version": "0.1.0",
+  "author": "EdGracia",
+  "license": "MIT",
+  "description": "A stoic companion for the Omarchy bar — memento mori and daily stoic reflection.",
+  "kinds": ["bar-widget"],
+  "activation": "on-demand",
+  "entryPoints": {
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "Respice",
+    "description": "Rotating stoic quotes and reflections in a bar pill.",
+    "category": "Info",
+    "allowMultiple": false
+  }
+}
