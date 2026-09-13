@@ -34,9 +34,42 @@ active-hours restriction yet (planned for a future settings UI). A
 **Random Reminders** toggle in the panel turns these off entirely; the setting is
 persisted and survives a shell restart.
 
+## Installation
+
+```bash
+omarchy plugin add https://github.com/EdGracia/respice.git --enable
+```
+
+This clones the plugin into
+`~/.config/omarchy/plugins/io.github.edgracia.respice`, validates it, and
+(with `--enable`) turns it on and asks which bar section to place it in.
+If the icon doesn't show up right away:
+
+```bash
+omarchy restart shell
+```
+
+## Uninstallation
+
+```bash
+omarchy plugin remove io.github.edgracia.respice
+```
+
+This disables the widget and deletes its plugin folder. Your saved
+reflections and the Random Reminders setting
+(`~/.local/state/omarchy/respice-reflections.json` and
+`~/.local/state/omarchy/respice-settings.json`) are left on disk — delete
+those by hand if you want a clean slate.
+
+## Dependencies
+
+None beyond Omarchy itself. The reminder notification is sent via
+`omarchy-notification-send`, a command that ships with Omarchy — no
+external packages or services required.
+
 ## Project layout
 
-- `manifest.json` — plugin metadata (id `respice`, kind `bar-widget`).
+- `manifest.json` — plugin metadata (id `io.github.edgracia.respice`, kind `bar-widget`).
 - `BarWidget.qml` — the bar icon and click-to-toggle wiring; also the
   owner of the shared quote list/index and the random-interval reminder
   timer, since it (unlike the panel) is never torn down.
@@ -58,10 +91,10 @@ folder that is a symlink** — a real directory is required. So, until this
 repo has a sync script, copy your changes over after each edit:
 
 ```bash
-rm -rf ~/.config/omarchy/plugins/respice
-cp -r ~/Projects/respice ~/.config/omarchy/plugins/respice
-omarchy plugin validate ~/.config/omarchy/plugins/respice
-omarchy plugin enable respice   # only needed the first time
+rm -rf ~/.config/omarchy/plugins/io.github.edgracia.respice
+cp -r ~/Projects/respice ~/.config/omarchy/plugins/io.github.edgracia.respice
+omarchy plugin validate ~/.config/omarchy/plugins/io.github.edgracia.respice
+omarchy plugin enable io.github.edgracia.respice   # only needed the first time
 omarchy restart shell
 ```
 
@@ -71,7 +104,7 @@ changes (position, section) hot-reload on save via `~/.config/omarchy/shell.json
 Useful commands while iterating:
 
 ```bash
-omarchy bar move respice --section right   # bar placement
+omarchy bar move io.github.edgracia.respice --section right   # bar placement
 omarchy-shell shell rescanPlugins          # force a reload if a change doesn't apply
 ```
 
