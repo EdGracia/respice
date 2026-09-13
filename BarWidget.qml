@@ -1,9 +1,137 @@
 import QtQuick
+import Quickshell
+import Quickshell.Io
 import qs.Ui
 
 BarWidget {
   id: root
   moduleName: "respice"
+
+  // Shared quote state: BarWidget is the long-lived root (Panel.qml is
+  // recreated by the Loader), and the reminder timer below needs a quote
+  // pool even while the panel is closed. Panel.qml reaches back in via its
+  // injected `hostWidget` rather than owning its own copy, so "Next
+  // reflection" clicks and added reflections are visible to the timer too.
+  property var builtinQuotes: [
+    "Memento mori.",
+    "You have power over your mind, not outside events.",
+    "Waste no more time arguing what a good man should be. Be one.",
+    "The obstacle is the way."
+  ]
+
+  // Reflections added via the panel, persisted to disk so they survive a
+  // shell restart or logout — see reflectionsFile below.
+  property var customReflections: []
+
+  readonly property var quotes: root.builtinQuotes.concat(root.customReflections)
+  property int index: 0
+
+  function next() {
+    root.index = (root.index + 1) % root.quotes.length
+  }
+
+  function addReflection(text) {
+    root.customReflections = root.customReflections.concat([text])
+    root.index = root.quotes.length - 1
+    root.saveReflections()
+  }
+
+  function parseReflections(raw) {
+    try {
+      var data = JSON.parse(raw)
+      return Array.isArray(data) ? data.filter(function(item) {
+        return typeof item === "string" && item.trim() !== ""
+      }) : []
+    } catch (e) {
+      return []
+    }
+  }
+
+  function saveReflections() {
+    reflectionsFile.setText(JSON.stringify(root.customReflections, null, 2) + "\n")
+  }
+
+  // Flat file directly under the omarchy state root, mirroring
+  // clipboard-history.json's convention — no plugin-specific subdirectory
+  // to create, since ~/.local/state/omarchy/ already exists.
+  FileView {
+    id: reflectionsFile
+    path: Quickshell.env("HOME") + "/.local/state/omarchy/respice-reflections.json"
+    watchChanges: true
+    atomicWrites: true
+    printErrors: false
+    onLoaded: root.customReflections = root.parseReflections(text())
+    onLoadFailed: root.customReflections = []
+    onFileChanged: reload()
+  }
+
+  // Random-interval reminders, echoing the Roman practice of a servant
+  // periodically whispering memento mori to a general in triumph. No
+  // active-hours restriction yet — planned for a future settings UI.
+  readonly property int minReminderMs: 1 * 60 * 60 * 1000
+  readonly property int maxReminderMs: 5 * 60 * 60 * 1000
+
+  // Panel toggle to turn the periodic notification off entirely. Persisted
+  // the same way as customReflections (own FileView, same load/save shape)
+  // so the setting survives a shell restart.
+  property bool reminderEnabled: true
+
+  function setReminderEnabled(enabled) {
+    root.reminderEnabled = enabled
+    root.saveSettings()
+  }
+
+  function parseSettings(raw) {
+    try {
+      var data = JSON.parse(raw)
+      return (data && typeof data.reminderEnabled === "boolean") ? data.reminderEnabled : true
+    } catch (e) {
+      return true
+    }
+  }
+
+  function saveSettings() {
+    settingsFile.setText(JSON.stringify({ reminderEnabled: root.reminderEnabled }, null, 2) + "\n")
+  }
+
+  FileView {
+    id: settingsFile
+    path: Quickshell.env("HOME") + "/.local/state/omarchy/respice-settings.json"
+    watchChanges: true
+    atomicWrites: true
+    printErrors: false
+    onLoaded: root.reminderEnabled = root.parseSettings(text())
+    onLoadFailed: root.reminderEnabled = true
+    onFileChanged: reload()
+  }
+
+  function randomReminderInterval() {
+    return minReminderMs + Math.floor(Math.random() * (maxReminderMs - minReminderMs))
+  }
+
+  // Fires through the built-in Omarchy notification popup rather than a
+  // custom panel, per the plugin's design: the timer lives here, but the
+  // actual reminder UI is the shell's own notification system.
+  function sendReminder() {
+    var quote = root.quotes[Math.floor(Math.random() * root.quotes.length)]
+    Quickshell.execDetached(["omarchy-notification-send", "-g", "🧔🏼", "Respice", quote])
+  }
+
+  // `repeat: true` (rather than a one-shot restarted from onTriggered) so
+  // `running` can stay bound to `reminderEnabled` — toggling the panel
+  // switch just pauses/resumes the countdown via the binding. An explicit
+  // start()/stop() call would sever that binding, since assigning `running`
+  // imperatively anywhere overrides it for good.
+  Timer {
+    id: reminderTimer
+    running: root.reminderEnabled
+    repeat: true
+    interval: root.randomReminderInterval()
+    onTriggered: {
+      root.sendReminder()
+      interval = root.randomReminderInterval()
+    }
+  }
 
   function injectPanel() {
     var target = panelLoader.item

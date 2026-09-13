@@ -20,17 +20,35 @@ it drops a panel directly beneath the icon with:
   enforced as you type). Press Enter or click **Save** to add it to the
   rotation; Escape or **Cancel** discards it.
 
-Reflections you add only live in memory for the current shell session —
-nothing is persisted to disk yet, so a shell restart or logout clears them
-back to the built-in quotes.
+Reflections you add are saved to
+`~/.local/state/omarchy/respice-reflections.json` and survive a shell
+restart or logout. It's a plain JSON array of strings, so you can hand-edit
+or delete entries there too — changes to the file are picked up live,
+without needing to reopen the panel.
+
+On top of that, Respice periodically pushes one of the quotes as a desktop
+notification — a nod to the servant Roman generals were said to have kept
+at their side to keep whispering "memento mori" during a triumph. It picks
+a random gap (1–5 hours) between reminders, all day, with no
+active-hours restriction yet (planned for a future settings UI). A
+**Random Reminders** toggle in the panel turns these off entirely; the setting is
+persisted and survives a shell restart.
 
 ## Project layout
 
 - `manifest.json` — plugin metadata (id `respice`, kind `bar-widget`).
-- `BarWidget.qml` — the bar icon; owns nothing but the click-to-toggle
-  wiring, forwarding `open`/`close`/`toggle` to the panel.
-- `Panel.qml` — the popup: quote state, the "Add reflection" editor, and
-  all the UI.
+- `BarWidget.qml` — the bar icon and click-to-toggle wiring; also the
+  owner of the shared quote list/index and the random-interval reminder
+  timer, since it (unlike the panel) is never torn down.
+- `Panel.qml` — the popup: the "Add reflection" editor and all the UI,
+  reading/mutating quote state on `BarWidget.qml` via `hostWidget`.
+- `~/.local/state/omarchy/respice-reflections.json` — where custom
+  reflections are stored (not part of this repo; created on first save).
+  A plain JSON array of strings — hand-edit or delete entries here if
+  you'd rather manage your reflections outside the panel.
+- `~/.local/state/omarchy/respice-settings.json` — stores the Random Reminders
+  toggle (`{ "reminderEnabled": true }`), created the first time it's
+  flipped in the panel.
 
 ## Development
 

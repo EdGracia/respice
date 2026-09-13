@@ -21,16 +21,10 @@ Panel {
     return false
   }
 
-  property var quotes: [
-    "Memento mori.",
-    "You have power over your mind, not outside events.",
-    "Waste no more time arguing what a good man should be. Be one.",
-    "The obstacle is the way."
-  ]
-  property int index: 0
-
+  // Quote state lives on hostWidget (BarWidget.qml), not here, so the
+  // reminder timer and this panel share one pool. See BarWidget.qml.
   function next() {
-    root.index = (root.index + 1) % root.quotes.length
+    if (root.hostWidget) root.hostWidget.next()
   }
 
   readonly property int maxReflectionWords: 30
@@ -65,8 +59,7 @@ Panel {
   function submitReflection() {
     var text = reflectionField.text.trim()
     if (text === "") return
-    root.quotes = root.quotes.concat([text])
-    root.index = root.quotes.length - 1
+    if (root.hostWidget) root.hostWidget.addReflection(text)
     cancelReflection()
   }
 
@@ -99,7 +92,7 @@ Panel {
 
         Text {
           width: parent.width - Style.space(48)
-          text: root.quotes[root.index]
+          text: root.hostWidget ? root.hostWidget.quotes[root.hostWidget.index] : ""
           color: root.bar.foreground
           font.family: root.bar.fontFamily
           font.pixelSize: Style.font.title
@@ -121,6 +114,60 @@ Panel {
             bordered: true
             foreground: root.bar.foreground
             onClicked: root.toggleAddReflection()
+          }
+        }
+
+        // A hand-rolled compact switch rather than the shared `Toggle`: this
+        // theme's [controls] tokens pin both normal-color and selected-color
+        // to the same literal hex (differing only by alpha), so the shared
+        // component's `accent` prop has no way to force a distinct on-color.
+        // Off keeps the real Style.normal* helpers (matches every other
+        // theme's default look); on is a hardcoded green so the state reads
+        // unambiguously regardless of theme.
+        Item {
+          width: quoteColumn.width - Style.space(48)
+          height: reminderRow.implicitHeight
+
+          Row {
+            id: reminderRow
+            anchors.horizontalCenter: parent.horizontalCenter
+            spacing: Style.space(8)
+
+            Text {
+              anchors.verticalCenter: parent.verticalCenter
+              text: "Random Reminders"
+              color: root.bar.foreground
+              font.family: root.bar.fontFamily
+              font.pixelSize: Style.font.bodySmall
+            }
+
+            Rectangle {
+              id: reminderTrack
+              readonly property bool on: root.hostWidget ? root.hostWidget.reminderEnabled : true
+              anchors.verticalCenter: parent.verticalCenter
+              width: Style.space(30)
+              height: Style.space(16)
+              radius: height / 2
+              color: on ? "#2ecc71" : Style.normalFillFor(root.bar.foreground, Color.accent)
+              border.width: on ? 0 : Style.normalBorderWidth
+              border.color: Style.normalBorderFor(root.bar.foreground, Color.accent)
+
+              Rectangle {
+                width: parent.height - Style.space(4)
+                height: width
+                radius: width / 2
+                anchors.verticalCenter: parent.verticalCenter
+                x: reminderTrack.on ? parent.width - width - Style.space(2) : Style.space(2)
+                color: reminderTrack.on ? "white" : Qt.darker(root.bar.foreground, 1.25)
+                Behavior on x { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
+              }
+
+              MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: if (root.hostWidget) root.hostWidget.setReminderEnabled(!reminderTrack.on)
+              }
+            }
           }
         }
 
