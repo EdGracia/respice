@@ -9,6 +9,8 @@ reminders and stoic reflections, right in the bar.
 were said to have whispered to themselves in triumph: memento mori, respice
 post te, hominem te esse memento. "Remember, you are only a man."
 
+![Respice panel](preview.png)
+
 ## What it does
 
 A 🏛️ icon sits in the bar (currently pinned to the right section). Clicking
