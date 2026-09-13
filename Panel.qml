@@ -90,13 +90,31 @@ Panel {
         leftPadding: Style.space(24)
         rightPadding: Style.space(24)
 
-        Text {
+        // The mentor: the bar's old icon lives on here instead, as the
+        // "voice" delivering the quote — same character the reminder
+        // notification shows (see BarWidget.qml's sendReminder()), just
+        // moved from the bar (now the 🏛️ building) into the panel itself.
+        Row {
+          id: quoteRow
           width: parent.width - Style.space(48)
-          text: root.hostWidget ? root.hostWidget.quotes[root.hostWidget.index] : ""
-          color: root.bar.foreground
-          font.family: root.bar.fontFamily
-          font.pixelSize: Style.font.title
-          wrapMode: Text.WordWrap
+          spacing: Style.space(12)
+
+          Text {
+            id: mentorIcon
+            text: "🧔🏼"
+            font.pixelSize: Style.font.title * 2
+          }
+
+          Text {
+            width: quoteRow.width - mentorIcon.width - quoteRow.spacing
+            text: (root.hostWidget && root.hostWidget.reflections.length > 0)
+              ? root.hostWidget.reflections[root.hostWidget.index]
+              : "No reflections left — add one below, or restore the defaults by deleting\n~/.local/state/omarchy/respice/reflections.json."
+            color: root.bar.foreground
+            font.family: root.bar.fontFamily
+            font.pixelSize: Style.font.title
+            wrapMode: Text.WordWrap
+          }
         }
 
         Row {

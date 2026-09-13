@@ -11,8 +11,9 @@ post te, hominem te esse memento. "Remember, you are only a man."
 
 ## What it does
 
-A 🧔🏼 icon sits in the bar (currently pinned to the right section). Clicking
-it drops a panel directly beneath the icon with:
+A 🏛️ icon sits in the bar (currently pinned to the right section). Clicking
+it drops a panel directly beneath the icon, where 🧔🏼 — your philosopher
+mentor — delivers:
 
 - The current stoic quote.
 - **Next reflection** — cycles to the next quote.
@@ -20,11 +21,14 @@ it drops a panel directly beneath the icon with:
   enforced as you type). Press Enter or click **Save** to add it to the
   rotation; Escape or **Cancel** discards it.
 
-Reflections you add are saved to
-`~/.local/state/omarchy/respice-reflections.json` and survive a shell
-restart or logout. It's a plain JSON array of strings, so you can hand-edit
-or delete entries there too — changes to the file are picked up live,
-without needing to reopen the panel.
+The full rotation — the 4 built-in quotes plus anything you've added —
+lives in `~/.local/state/omarchy/respice/reflections.json`, a plain JSON
+array of strings. It's created the first time the plugin runs, seeded with
+the defaults, and from then on the file *is* the rotation: hand-edit it to
+reword a quote, reorder them, or delete any entry — including the
+defaults, if a particular one isn't for you. Changes are picked up live,
+no need to reopen the panel or restart the shell. Delete the whole file to
+reset back to the 4 defaults.
 
 On top of that, Respice periodically pushes one of the quotes as a desktop
 notification — a nod to the servant Roman generals were said to have kept
@@ -57,8 +61,8 @@ omarchy plugin remove io.github.edgracia.respice
 
 This disables the widget and deletes its plugin folder. Your saved
 reflections and the Random Reminders setting
-(`~/.local/state/omarchy/respice-reflections.json` and
-`~/.local/state/omarchy/respice-settings.json`) are left on disk — delete
+(`~/.local/state/omarchy/respice/reflections.json` and
+`~/.local/state/omarchy/respice/settings.json`) are left on disk — delete
 those by hand if you want a clean slate.
 
 ## Dependencies
@@ -75,11 +79,12 @@ external packages or services required.
   timer, since it (unlike the panel) is never torn down.
 - `Panel.qml` — the popup: the "Add reflection" editor and all the UI,
   reading/mutating quote state on `BarWidget.qml` via `hostWidget`.
-- `~/.local/state/omarchy/respice-reflections.json` — where custom
-  reflections are stored (not part of this repo; created on first save).
-  A plain JSON array of strings — hand-edit or delete entries here if
-  you'd rather manage your reflections outside the panel.
-- `~/.local/state/omarchy/respice-settings.json` — stores the Random Reminders
+- `~/.local/state/omarchy/respice/reflections.json` — the full reflection
+  rotation, defaults included (not part of this repo; created on first
+  run). A plain JSON array of strings — hand-edit, reorder, or delete any
+  entry, including the defaults, if you'd rather manage it outside the
+  panel.
+- `~/.local/state/omarchy/respice/settings.json` — stores the Random Reminders
   toggle (`{ "reminderEnabled": true }`), created the first time it's
   flipped in the panel.
 
