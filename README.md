@@ -36,7 +36,9 @@ at their side to keep whispering "memento mori" during a triumph. It picks
 a random gap (1–5 hours) between reminders, all day, with no
 active-hours restriction yet (planned for a future settings UI). A
 **Random Reminders** toggle in the panel turns these off entirely; the setting is
-persisted and survives a shell restart.
+persisted and survives a shell restart. Switching it back on fires an
+immediate preview notification (your first reflection) so you know what
+to expect.
 
 ## Installation
 

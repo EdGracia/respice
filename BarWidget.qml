@@ -97,8 +97,14 @@ BarWidget {
   property bool reminderEnabled: true
 
   function setReminderEnabled(enabled) {
+    var turningOn = enabled && !root.reminderEnabled
     root.reminderEnabled = enabled
     root.saveSettings()
+    // Preview notification on off->on only, so a user flipping the switch
+    // sees what they just signed up for. Always the first reflection
+    // (index 0), not a random one via sendReminder() — a stable preview,
+    // not a taste of the randomness itself.
+    if (turningOn && root.reflections.length > 0) root.notify(root.reflections[0])
   }
 
   function parseSettings(raw) {
@@ -132,10 +138,13 @@ BarWidget {
   // Fires through the built-in Omarchy notification popup rather than a
   // custom panel, per the plugin's design: the timer lives here, but the
   // actual reminder UI is the shell's own notification system.
+  function notify(quote) {
+    Quickshell.execDetached(["omarchy-notification-send", "-g", "🧔🏼", "Respice", quote])
+  }
+
   function sendReminder() {
     if (root.reflections.length === 0) return
-    var quote = root.reflections[Math.floor(Math.random() * root.reflections.length)]
-    Quickshell.execDetached(["omarchy-notification-send", "-g", "🧔🏼", "Respice", quote])
+    root.notify(root.reflections[Math.floor(Math.random() * root.reflections.length)])
   }
 
   // `repeat: true` (rather than a one-shot restarted from onTriggered) so
