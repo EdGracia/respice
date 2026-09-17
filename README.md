@@ -36,7 +36,7 @@ On top of that, Respice periodically pushes one of the quotes as a desktop
 notification — a nod to the servant Roman generals were said to have kept
 at their side to keep whispering "memento mori" during a triumph. It picks
 a random gap (1–5 hours) between reminders, all day, with no
-active-hours restriction yet (planned for a future settings UI). A
+active-hours restriction yet (planned for a future settings UI update). A
 **Random Reminders** toggle in the panel turns these off entirely; the setting is
 persisted and survives a shell restart. Switching it back on fires an
 immediate preview notification (your first reflection) so you know what
@@ -92,23 +92,6 @@ external packages or services required.
   toggle (`{ "reminderEnabled": true }`), created the first time it's
   flipped in the panel.
 
-## Development
-
-The Omarchy shell only loads plugins from `~/.config/omarchy/plugins/<id>/`,
-and `omarchy plugin validate` (and the shell itself) **refuses a plugin
-folder that is a symlink** — a real directory is required. So, until this
-repo has a sync script, copy your changes over after each edit:
-
-```bash
-rm -rf ~/.config/omarchy/plugins/io.github.edgracia.respice
-cp -r ~/Projects/respice ~/.config/omarchy/plugins/io.github.edgracia.respice
-omarchy plugin validate ~/.config/omarchy/plugins/io.github.edgracia.respice
-omarchy plugin enable io.github.edgracia.respice   # only needed the first time
-omarchy restart shell
-```
-
-`omarchy restart shell` is only needed for QML logic changes. Bar layout
-changes (position, section) hot-reload on save via `~/.config/omarchy/shell.json`.
 
 Useful commands while iterating:
 
